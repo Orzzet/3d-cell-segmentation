@@ -7,14 +7,17 @@ import os
 import numpy as np
 
 PATHS = {
-'LQ_NOBATCH_TRAIN' : 'data/cells/train_lq_nobatch/',
-'LQ_NOBATCH_VALID' : 'data/cells/valid_lq_nobatch/',
-'LQ_NOBATCH_TEST' : 'data/cells/test_lq_nobatch/',
-'LQ_BATCH_TRAIN' : 'data/cells/train_lq_batch/',
-'LQ_BATCH_VALID' : 'data/cells/valid_lq_batch/',
-'LQ_BATCH_TEST' : 'data/cells/test_lq_batch/',
-'HQ_BATCH_TEST' : 'data/cells/test_hq_batch/',
-'MQ_BATCH_TEST' : 'data/cells/test_mq_batch/'
+'RAW' : 'data/cells/raw/',
+'LQ_TRAIN' : 'data/cells/0.25z 0.125x 0.125y/train',
+'LQ_VALID' : 'data/cells/0.25z 0.125x 0.125y/valid',
+'LQ_TEST' : 'data/cells/0.25z 0.125x 0.125y/test',
+'MQ_TRAIN' : 'data/cells/0.5z 0.25x 0.25y/train',
+'MQ_VALID' : 'data/cells/0.5z 0.25x 0.25y/valid',
+'MQ_TEST' : 'data/cells/0.5z 0.25x 0.25y/test',
+'HQ_TRAIN' : 'data/cells/0.5z 0.5x 0.5y/train',
+'HQ_VALID' : 'data/cells/0.5z 0.5x 0.5y/valid',
+'HQ_TEST' : 'data/cells/0.5z 0.5x 0.5y/test',
+
 }
 
 
