@@ -6,7 +6,7 @@ class MiniUNet3D(nn.Module):
     def __init__(self, in_channel, n_classes):
         self.in_channel = in_channel
         self.n_classes = n_classes
-        super(UNet3D, self).__init__()
+        super(MiniUNet3D, self).__init__()
         self.ec0 = self.encoder(self.in_channel, 32, padding=0, bias=False)
         self.ec1 = self.encoder(32, 64, bias=False, padding=0)
         self.ec2 = self.encoder(64, 64, bias=False, padding=0)

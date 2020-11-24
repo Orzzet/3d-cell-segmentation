@@ -70,7 +70,7 @@ def metrics(model, dataset, save=False, model_name=None):
     correct_cell_count[0].tolist(), resized_cell_count[0].tolist(), preds_cell_count
     ))
     if save:
-        checkpoint = torch.load(model_name + '.pth.tar')
+        checkpoint = torch.load(model_name + '.pth')
         model_state_dict = checkpoint['model_state_dict']
         optimizer_state_dict = checkpoint['optimizer_state_dict']
         train_losses = checkpoint['train_losses']
@@ -122,7 +122,7 @@ def plot_epochs(train_losses, valid_losses, model_name):
     plt.plot(train_losses, label='Training loss')
     plt.plot(valid_losses, label='Validation loss')
     plt.title(model_name)
-    plt.ylabel('Dice Loss')
+    plt.ylabel('Loss')
     plt.ylim([0,1])
     plt.xlabel('Epochs')
     plt.legend(frameon=False)

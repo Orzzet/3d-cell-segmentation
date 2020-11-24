@@ -43,9 +43,9 @@ class CellsDataset(VisionDataset):
 
     def reduce_dims(self, image, index):
         i, j, k = self.files[index][1]
-        c, x, y, z = image.shape
-        x, y, z = x//self.dim_size_reduction[0], y//self.dim_size_reduction[1], z//self.dim_size_reduction[2]
-        return image[:,i*x:(i+1)*x,j*y:(j+1)*y,k*z:(k+1)*z]
+        z, x, y = image.shape
+        z, x, y = z//self.dim_size_reduction[2], x//self.dim_size_reduction[0], y//self.dim_size_reduction[1]
+        return image[k*z:(k+1)*z,i*x:(i+1)*x,j*y:(j+1)*y]
     
     def __getitem__(self, index):
         # Load file with all images
@@ -53,7 +53,7 @@ class CellsDataset(VisionDataset):
         # Get cell count for original and for 
         correct_cell_count, resized_cell_count = current_file.attrs['correct_cell_count'], current_file.attrs['cell_count']
         image = current_file.get('image')
-        #image = self.reduce_dims(image, index)
+        image = self.reduce_dims(image, index)
         image = np.array(image, dtype='f4')
         image = (image - np.min(image))/(np.max(image) - np.min(image))
         if self.target_mode == 'boundaries':
@@ -62,7 +62,7 @@ class CellsDataset(VisionDataset):
             target = current_file.get('not_segmented_target')
         elif self.target_mode == 'target':
             target = current_file.get('target')
-        #target = self.reduce_dims(target, index)
+        target = self.reduce_dims(target, index)
         target = np.array(target, dtype='i2')
         image = Variable(torch.tensor(image))
         # Image is originally (z,x,y), we need to convert it to (c=1,x,y,z) to use the torchio transforms, where c is number of channels
