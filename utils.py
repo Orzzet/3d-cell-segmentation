@@ -54,7 +54,7 @@ def metrics(model, dataset, save=False, model_name=None):
         filename = model_name + '.pth'
     model.cuda()
     preds, targets, correct_cell_count, resized_cell_count = zip(*
-                         [(torch.max(model(image.unsqueeze(0).cuda()).cpu(), 1)[1], target, correct_cc, resized_cc) 
+                         [(torch.max(model(image.unsqueeze(0).cuda()).cpu(), 1)[1], target, correct_cc[0], resized_cc[0]) 
                           for image, target, correct_cc, resized_cc in dataset]
                                )
     preds_cell_count = [measure.label(pred.squeeze(0), return_num=True)[1] for pred in preds]
@@ -67,7 +67,7 @@ def metrics(model, dataset, save=False, model_name=None):
     print("Matriz de confusión por clases:\n {}".format(conf_matrix))
     print("mean IoU:\n {}".format(miou))
     print("Células etiquetado original:\n {} \n Células etiquetado reescalado: \n {}\n Células predicción:\n {}".format(
-    correct_cell_count[0].tolist(), resized_cell_count[0].tolist(), preds_cell_count
+    correct_cell_count, resized_cell_count, preds_cell_count
     ))
     if save:
         checkpoint = torch.load(model_name + '.pth')
@@ -110,9 +110,9 @@ def imshow(imgs):
         f.set_figheight(4*nrows)
         for i, img in enumerate(imgs):
             axarr[i//4][i % 4].matshow(img)
-            
+
 def plot_epochs(train_losses, valid_losses, model_name):
-    valid_min = np.min(valid_losses)
+    valid_min = np.nanmin(valid_losses)
     min_index = np.where(valid_losses == valid_min)[0][0]
     train_min = train_losses[min_index]
     print("Mejor valor de validación: {}\t Valor de entrenamiento: {}\t iteracion: {}\n Último valor de validación: {}\t Valor de entrenamiento: {}\t iteracion: {}".format(

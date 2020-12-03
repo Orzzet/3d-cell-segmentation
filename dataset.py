@@ -7,7 +7,7 @@ import os
 import numpy as np
 
 PATHS = {
-'RAW' : 'data/cells/raw/',
+'RAW' : 'data/cells/1z 1x 1y/',
 'LQ_TRAIN' : 'data/cells/0.25z 0.125x 0.125y/train/',
 'LQ_VALID' : 'data/cells/0.25z 0.125x 0.125y/valid/',
 'LQ_TEST' : 'data/cells/0.25z 0.125x 0.125y/test/',
@@ -56,12 +56,7 @@ class CellsDataset(VisionDataset):
         image = self.reduce_dims(image, index)
         image = np.array(image, dtype='f4')
         image = (image - np.min(image))/(np.max(image) - np.min(image))
-        if self.target_mode == 'boundaries':
-            target = current_file.get('boundaries')
-        elif self.target_mode == 'not_segmented_target':
-            target = current_file.get('not_segmented_target')
-        elif self.target_mode == 'target':
-            target = current_file.get('target')
+        target = current_file.get(self.target_mode)
         target = self.reduce_dims(target, index)
         target = np.array(target, dtype='i2')
         image = Variable(torch.tensor(image))
