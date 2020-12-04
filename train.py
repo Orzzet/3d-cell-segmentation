@@ -18,7 +18,7 @@ def target_to_one_hot(target):
     target[torch.arange(torch.numel(temp)),temp] = 1
     return target
 
-def train(model, train_loader, valid_loader, model_name, n_epochs = 100, loss_function = 'dice', AMP=True, train_on_gpu=True, test_data = None):
+def train(model, train_loader, valid_loader, model_name, n_epochs = 100, loss_function = 'dice', AMP=True, gpu=True, test_data = None):
     optimizer = optim.Adam(model.parameters(), weight_decay=0.00001)
     if AMP:
         model, optimizer = amp.initialize(model, optimizer, opt_level="O1")
@@ -69,7 +69,7 @@ def train(model, train_loader, valid_loader, model_name, n_epochs = 100, loss_fu
         for data, target, correct_cell_count, resized_cell_count in train_loader:
             target = target.squeeze(0)
             # move tensors to GPU if CUDA is available
-            if train_on_gpu:
+            if gpu:
                 data = Variable(data).cuda()
             # clear the gradients of all optimized variables
             optimizer.zero_grad()
@@ -78,12 +78,12 @@ def train(model, train_loader, valid_loader, model_name, n_epochs = 100, loss_fu
             datasize = data.size(0)
             del data
             if loss_function in {'wce', 'ce'}:
-                if train_on_gpu:
+                if gpu:
                     target = Variable(target).cuda().long()
                 loss = criterion(output, target)
             else: # 'dice'
                 target = target_to_one_hot(target).float()
-                if train_on_gpu:
+                if gpu:
                     target = Variable(target).cuda()
                 # calculate the batch loss
                 output = output.permute(0,2,3,4,1).contiguous().view(-1,2).float()
@@ -108,19 +108,19 @@ def train(model, train_loader, valid_loader, model_name, n_epochs = 100, loss_fu
         for data, target, correct_cell_count, resized_cell_count in valid_loader:
             target = target.squeeze(0)
             # move tensors to GPU if CUDA is available
-            if train_on_gpu:
+            if gpu:
                 data = Variable(data).cuda()
             # forward pass: compute predicted outputs by passing inputs to the model
             output = model(data)
             datasize = data.size(0)
             del data
             if loss_function in {'wce', 'ce'}:
-                if train_on_gpu:
+                if gpu:
                     target = Variable(target).cuda().long()
                 loss = criterion(output, target)
             else:
                 target = target_to_one_hot(target).float()
-                if train_on_gpu:
+                if gpu:
                     target = Variable(target).cuda()
                 # calculate the batch loss
                 output = output.permute(0,2,3,4,1).contiguous().view(-1,2).float()

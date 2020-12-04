@@ -1,4 +1,6 @@
+torch
 torchio
 scikit-image
 kornia
 h5py
+pyyaml
