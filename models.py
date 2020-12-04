@@ -1,3 +1,4 @@
+import os
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -178,3 +179,20 @@ class UNet3D(nn.Module):
         dim2_c = (dim2 - target_sizes[1]) // 2
         dim3_c = (dim3 - target_sizes[2]) // 2
         return layer[:, :, dim1_c:dim1_c+target_sizes[0], dim2_c:dim2_c+target_sizes[1], dim3_c:dim3_c+target_sizes[2]]
+
+
+def initialize_model(model_name, train_on_gpu = True, arch = "UNet3D"):
+    if arch == "UNet3D":
+        model = UNet3D(1,2)
+    else:
+        model = MiniUNet3D(1,2)
+    if train_on_gpu:
+        print('CUDA disponible, entrenando en GPU ...')
+    else:
+        print('CUDA no disponible, entrenando en CPU ...')
+    if train_on_gpu:
+        model.cuda()
+    model_filename = model_name + ".pth"
+    if os.path.isfile(model_name + ".pth"):
+        model.load_state_dict(torch.load(model_filename)['best_model_state_dict'])
+    return model

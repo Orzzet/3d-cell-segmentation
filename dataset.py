@@ -1,10 +1,13 @@
-import torch
-from torchvision.datasets import VisionDataset
-from torch.utils.data import Dataset, DataLoader
-from torch.autograd import Variable
 import h5py
 import os
 import numpy as np
+import torch
+import torch.nn as nn
+import torchio.transforms as transformsio
+import kornia.augmentation as K
+from torchvision.datasets import VisionDataset
+from torch.autograd import Variable
+from torchvision import transforms
 
 PATHS = {
 'RAW' : 'data/cells/1z 1x 1y/',
@@ -17,7 +20,6 @@ PATHS = {
 'HQ_TRAIN' : 'data/cells/0.5z 0.5x 0.5y/train/',
 'HQ_VALID' : 'data/cells/0.5z 0.5x 0.5y/valid/',
 'HQ_TEST' : 'data/cells/0.5z 0.5x 0.5y/test/',
-
 }
 
 
@@ -73,4 +75,38 @@ class CellsDataset(VisionDataset):
             both = torch.stack((image, target))
             image, target = self.transform_augmentation(both)
         return image, target, correct_cell_count, resized_cell_count
+
+
+def get_train_valid_dataloaders(dim_size_reduction = (1,1,1), target_mode = 'target', train_path = PATHS["LQ_TRAIN"], valid_path = PATHS["LQ_VALID"]):
+    # number of subprocesses to use for data loading
+    num_workers = 0
+    # how many samples per batch to load
+    batch_size = 1
+
+    # convert data to a normalized torch.FloatTensor
+    transform = transforms.Compose([transformsio.ZNormalization()])
+    transform_augmentation = nn.Sequential(
+        K.RandomDepthicalFlip3D(same_on_batch=True), 
+        K.RandomHorizontalFlip3D(same_on_batch=True), 
+        K.RandomVerticalFlip3D(same_on_batch=True),
+    #    K.RandomRotation3D((0.5, 3, 3), same_on_batch=True)
+    )
+
+    # training and test datasets
+    train_data = CellsDataset(train_path, target_mode=target_mode, transform = transform, transform_augmentation=transform_augmentation, dim_size_reduction=dim_size_reduction)
+    valid_data = CellsDataset(valid_path, target_mode=target_mode, transform = transform, dim_size_reduction=dim_size_reduction)
+
+    # prepare data loaders
+    train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, num_workers=num_workers)
+    valid_loader = torch.utils.data.DataLoader(valid_data, batch_size=batch_size, num_workers=num_workers)
+
+    return train_loader, valid_loader
+
+
+def get_test_dataset(target_mode = 'target', dim_size_reduction = (1,1,1), test_path = PATHS["LQ_TEST"]):
+    transform = transforms.Compose([transformsio.ZNormalization()])
+
+    test_data = CellsDataset(test_path, target_mode=target_mode, transform = transform, dim_size_reduction=dim_size_reduction)
+
+    return test_data
 
