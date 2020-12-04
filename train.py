@@ -48,6 +48,9 @@ def train(model, train_loader, valid_loader, model_name, n_epochs = 100, loss_fu
         exists_best_model = True
         del checkpoint
         torch.cuda.empty_cache()
+        n_epochs = max(n_epochs - current_epoch, 0)
+        print("---")
+        print("Modelo entrenado {} epochs, se entrenará {} epochs más para llegar a {}".format(current_epoch, n_epochs, n_epochs + current_epoch))
     else:
         train_losses = []
         valid_losses = []
