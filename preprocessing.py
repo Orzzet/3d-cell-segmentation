@@ -15,7 +15,7 @@ def multi_instance_semseg(target):
     return target, measure.label(target, return_num=True)[1], target_segmentation
 
 
-def get_highest_xyz_after_reduction(filenames, dims_reduction=(1,1,1), original_dataset_path):
+def get_highest_xyz_after_reduction(filenames, original_dataset_path, dims_reduction=(1,1,1)):
     file_paths = [original_dataset_path + filename for filename in filenames]
     highest_xyz = [-1,-1,-1]
     for filename in filenames:
