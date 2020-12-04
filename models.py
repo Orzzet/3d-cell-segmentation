@@ -195,4 +195,5 @@ def initialize_model(model_name, train_on_gpu = True, arch = "UNet3D"):
     model_filename = model_name + ".pth"
     if os.path.isfile(model_name + ".pth"):
         model.load_state_dict(torch.load(model_filename)['best_model_state_dict'])
+    torch.cuda.empty_cache()
     return model

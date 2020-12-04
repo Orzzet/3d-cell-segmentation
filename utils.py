@@ -46,6 +46,7 @@ def compare_output(model, index, dataset, Zs):
     print("Matriz de confusión por clases de esta imagen: \n{}".format(conf_matrix))
     print("IoU de esta imagen: \n{}".format(miou))
     draw_images([image[0], target[0], pred[0]], Zs)
+    torch.cuda.empty_cache()
     return pred, output
     
 
@@ -71,28 +72,13 @@ def metrics(model, dataset, save=False, model_name=None):
     ))
     if save:
         checkpoint = torch.load(model_name + '.pth')
-        model_state_dict = checkpoint['model_state_dict']
-        optimizer_state_dict = checkpoint['optimizer_state_dict']
-        train_losses = checkpoint['train_losses']
-        valid_losses = checkpoint['valid_losses']
-        current_epoch = checkpoint['epochs']
-        best_model_state_dict = checkpoint['best_model_state_dict']
-        best_optimizer_state_dict = checkpoint['best_optimizer_state_dict']
-        valid_loss_min = checkpoint['valid_loss_min']
-        #amp_state_dict = checkpoint['amp_state_dict']
-        torch.save({
-            'epochs': current_epoch,
-            'best_model_state_dict': best_model_state_dict,
-            'best_optimizer_state_dict' : best_optimizer_state_dict,
-            'model_state_dict' : model.state_dict(),
-            'optimizer_state_dict' : optimizer_state_dict,
-            'train_losses': train_losses,
-            'valid_losses': valid_losses,
-            'valid_loss_min' : valid_loss_min,
-            'test_conf_matrix': conf_matrix,
-            'test_miou' : miou,
-            #'amp_state_dict': amp_state_dict
-    }, filename)
+        checkpoint['test_conf_matrix'] = conf_matrix
+        checkpoint['test_miou'] = miou
+        AMP = 'amp_state_dict' in checkpoint
+        if AMP:
+            amp_state_dict = checkpoint['amp_state_dict']
+        torch.save(checkpoint, filename)
+    torch.cuda.empty_cache()
     return conf_matrix, miou
 
         
