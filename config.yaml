@@ -6,11 +6,15 @@ model_name: "test"
 arch: "UNet3D"
 AMP: True
 
-# If training:
+# If job=train:
 train_path: "data/cells/0.25z 0.125x 0.125y/train/"
 valid_path: "data/cells/0.25z 0.125x 0.125y/valid/"
 loss_function: "dice"
 n_epochs: 3
 
-# If testing:
+# If job=test:
 test_path: "data/cells/0.25z 0.125x 0.125y/test/"
+
+# If job=predict:
+input_path: "data/cells/0.25z 0.125x 0.125y/test/"
+output_path: "data/cells/0.25z 0.125x 0.125y/test/preds/"

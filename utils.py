@@ -3,6 +3,8 @@ import torch.nn as nn
 import kornia.utils as Ku
 import matplotlib.pyplot as plt
 import numpy as np
+import h5py
+import os
 from torch.autograd import Variable
 from skimage import measure
 
@@ -93,9 +95,24 @@ def metrics_prediction(prediction, target):
     ))
     draw_images([target_colored, pred_colored], [20, 25, 40, 45])
         
+def predict(model, input_images, output_path, gpu):
+    if gpu:
+        model = model.cuda()
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
+    for i, image in enumerate(input_images):
+        image = image.unsqueeze(0)
+        if gpu:
+            image = image.cuda()
+        prediction = torch.max(model(image).cpu(), 1)[1].squeeze(0)
+        with h5py.File("{}{}.h5".format(output_path, i), 'w') as fw:
+            fw.create_dataset('prediction', shape = prediction.shape, dtype='i2', data=prediction, compression = "gzip", compression_opts=4)
+        print(prediction.shape)
+        draw_images([prediction], [prediction.shape[0]//4, 2 * prediction.shape[0]//4, 3 * prediction.shape[0]//4, 4*prediction.shape[0]//4 - 1])
+        
 def draw_images(images, Zs):
     imshow([image[Z,:,:] for image in images for Z in Zs])
-
+    
 def imshow(imgs):
     if len(imgs) == 1:
         plt.matshow(imgs[0])
