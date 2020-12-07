@@ -37,7 +37,7 @@ def compare_output(model, index, dataset, Zs):
     image, target, correct_cell_count, resized_cell_count = dataset[index]
     output = model(image.unsqueeze(0).cuda()).cpu()
     pred = torch.max(output, 1)[1]
-    pred_cell_count = measure.label(pred.squeeze(0), return_num=True)[1]
+    pred_colored, pred_cell_count = measure.label(pred.squeeze(0), return_num=True)
     conf_matrix = Ku.confusion_matrix(pred.reshape((1, -1)), target.reshape((1, -1)), 2, normalized=True)
     miou = Ku.mean_iou(pred.reshape((1, -1)), target.reshape((1, -1)), 2)
     print("Células etiquetado original: {}\t Células etiquetado reescalado: {} \t Células predicción: {}".format(
@@ -45,10 +45,11 @@ def compare_output(model, index, dataset, Zs):
     ))
     print("Matriz de confusión por clases de esta imagen: \n{}".format(conf_matrix))
     print("IoU de esta imagen: \n{}".format(miou))
-    draw_images([image[0], target[0], pred[0]], Zs)
+    print(pred_colored.shape)
+    draw_images([image[0], measure.label(target[0]), pred_colored], Zs)
     torch.cuda.empty_cache()
     return pred, output
-    
+
 
 def metrics(model, dataset, save=False, model_name=None):
     if model_name:
@@ -81,6 +82,16 @@ def metrics(model, dataset, save=False, model_name=None):
     torch.cuda.empty_cache()
     return conf_matrix, miou
 
+def metrics_prediction(prediction, target):
+    prediction, target = torch.tensor(prediction, dtype=torch.int16), torch.tensor(target)
+    miou = Ku.mean_iou(prediction.reshape((1,-1)), target.reshape((1,-1)), 2)[0]
+    pred_colored, pred_cell_count = measure.label(prediction, return_num=True)
+    target_colored, target_cell_count = measure.label(target, return_num=True)
+    print("mean IoU:\n {}".format(miou))
+    print("Células etiquetado reescalado:\n {} \n Células predicción:\n {}".format(
+    target_cell_count, pred_cell_count
+    ))
+    draw_images([target_colored, pred_colored], [20, 25, 40, 45])
         
 def draw_images(images, Zs):
     imshow([image[Z,:,:] for image in images for Z in Zs])

@@ -33,8 +33,12 @@ class CellsDataset(VisionDataset):
             transform (callable, optional): Optional transform to be applied on a original image.
             transform_augmentation (callable, optional): Optional transform to be applied on a both original and target image.
         """
-        self.files = [(folder_path + filename, (i,j,k)) for filename in list(os.walk(folder_path))[0][2]
-                      for i in range(dim_size_reduction[0]) for j in range(dim_size_reduction[1]) for k in range(dim_size_reduction[2])]
+        dataset_files = list(os.walk(folder_path))
+        if dataset_files:
+            self.files = [(folder_path + filename, (i,j,k)) for filename in dataset_files[0][2]
+                          for i in range(dim_size_reduction[0]) for j in range(dim_size_reduction[1]) for k in        range(dim_size_reduction[2])]
+        else:
+            self.files = []
         self.transform = transform
         self.transform_augmentation = transform_augmentation
         self.dim_size_reduction = dim_size_reduction

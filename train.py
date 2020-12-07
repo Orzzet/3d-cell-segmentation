@@ -18,7 +18,7 @@ def target_to_one_hot(target):
     target[torch.arange(torch.numel(temp)),temp] = 1
     return target
 
-def train(model, train_loader, valid_loader, model_name, n_epochs = 100, loss_function = 'dice', AMP=True, gpu=True, test_data = None):
+def train(model, train_loader, valid_loader, model_name, n_epochs = 100, loss_function = 'dice', AMP=True, gpu=True, test_data = None, models_folder = "./"):
     optimizer = optim.Adam(model.parameters(), weight_decay=0.00001)
     if AMP:
         model, optimizer = amp.initialize(model, optimizer, opt_level="O1")
@@ -31,7 +31,7 @@ def train(model, train_loader, valid_loader, model_name, n_epochs = 100, loss_fu
         criterion = nn.Softmax(dim=1)
 
     exists_best_model = False
-    filename = model_name + '.pth'
+    filename = models_folder + model_name + '.pth'
 
     if os.path.isfile(filename):
         checkpoint = torch.load(filename)
@@ -70,6 +70,8 @@ def train(model, train_loader, valid_loader, model_name, n_epochs = 100, loss_fu
         ###################
         model.train()
         for data, target, correct_cell_count, resized_cell_count in train_loader:
+            if 1 not in target:
+                continue
             target = target.squeeze(0)
             # move tensors to GPU if CUDA is available
             if gpu:
@@ -109,6 +111,8 @@ def train(model, train_loader, valid_loader, model_name, n_epochs = 100, loss_fu
         ######################
         model.eval()
         for data, target, correct_cell_count, resized_cell_count in valid_loader:
+            if 1 not in target:
+                continue
             target = target.squeeze(0)
             # move tensors to GPU if CUDA is available
             if gpu:

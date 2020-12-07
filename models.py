@@ -181,7 +181,7 @@ class UNet3D(nn.Module):
         return layer[:, :, dim1_c:dim1_c+target_sizes[0], dim2_c:dim2_c+target_sizes[1], dim3_c:dim3_c+target_sizes[2]]
 
 
-def initialize_model(model_name, gpu = True, arch = "UNet3D"):
+def initialize_model(model_name, gpu = True, arch = "UNet3D", models_folder = "./"):
     if arch == "UNet3D":
         model = UNet3D(1,2)
     else:
@@ -191,8 +191,8 @@ def initialize_model(model_name, gpu = True, arch = "UNet3D"):
         model.cuda()
     else:
         print('CUDA no disponible, usando CPU ...')
-    model_filename = model_name + ".pth"
-    if os.path.isfile(model_name + ".pth"):
+    model_filename = models_folder +  model_name + ".pth"
+    if os.path.isfile(model_filename):
         model.load_state_dict(torch.load(model_filename)['best_model_state_dict'])
     torch.cuda.empty_cache()
     return model
